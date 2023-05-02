@@ -29,18 +29,18 @@ func newMongoClient(ctx context.Context, conf Config) (*mongo.Client, error) {
 	return client, nil
 }
 
-func NewMongoStorage(conf Config) (storage.Storage, error) {
+func NewMongoStorageOrPanic(conf Config) storage.Storage {
 	client, err := newMongoClient(context.Background(), conf)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	impl := &Impl{
 		collection: client.Database(conf.Database).Collection(CollectionName),
 	}
 	if err := impl.ensureIndexes(conf); err != nil {
-		return nil, err
+		panic(err)
 	}
-	return impl, nil
+	return impl
 }
 
 func (i *Impl) ensureIndexes(conf Config) error {

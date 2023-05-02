@@ -15,15 +15,18 @@ type Impl struct {
 	db *gorm.DB
 }
 
-func NewPostgresStorage(conf Config) (storage.Storage, error) {
+func NewPostgresStorageOrPanic(conf Config) storage.Storage {
 	db, err := gorm.Open(postgres.Open(conf.GetURL()), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
 	err = db.AutoMigrate(&storage.Record{})
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	return &Impl{
 		db: db,
-	}, nil
+	}
 }
 
 func (i *Impl) GenerateRandomData(ctx context.Context, count int) error {
